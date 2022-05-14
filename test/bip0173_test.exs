@@ -25,14 +25,14 @@ defmodule BIP0173Test do
 
   @invalid_checksum_bech32 [
     <<0x20, "1nwldj5">>,
-    <<0x7f, "1axkwrx">>,
+    <<0x7F, "1axkwrx">>,
     <<0x80, "1eym55h">>,
     "an84characterslonghumanreadablepartthatcontainsthenumber1andtheexcludedcharactersbio1569pvx",
     "pzry9x0s0muk",
     "1pzry9x0s0muk",
     "x1b4n0q5v",
     "li1dgmt3",
-    <<"de1lg7wt", 0xff>>,
+    <<"de1lg7wt", 0xFF>>,
     "A1G7SGD8",
     "10a06t8",
     "1qzzfhee"
@@ -40,7 +40,7 @@ defmodule BIP0173Test do
 
   @invalid_checksum_bech32m [
     <<0x20, "1xj0phk">>,
-    <<0x7f, "1g6xzxy">>,
+    <<0x7F, "1g6xzxy">>,
     <<0x80, "1vctc34">>,
     "an84characterslonghumanreadablepartthatcontainsthetheexcludedcharactersbioandnumber11d6pts4",
     "qyrz8wqd2c9m",
@@ -56,19 +56,32 @@ defmodule BIP0173Test do
   ]
 
   @valid_address [
-    ["BC1QW508D6QEJXTDG4Y5R3ZARVARY0C5XW7KV8F3T4", "0014751e76e8199196d454941c45d1b3a323f1433bd6"],
-    ["tb1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q0sl5k7",
-    "00201863143c14c5166804bd19203356da136c985678cd4d27a1b8c6329604903262"],
-    ["bc1pw508d6qejxtdg4y5r3zarvary0c5xw7kw508d6qejxtdg4y5r3zarvary0c5xw7kt5nd6y",
-    "5128751e76e8199196d454941c45d1b3a323f1433bd6751e76e8199196d454941c45d1b3a323f1433bd6"],
+    [
+      "BC1QW508D6QEJXTDG4Y5R3ZARVARY0C5XW7KV8F3T4",
+      "0014751e76e8199196d454941c45d1b3a323f1433bd6"
+    ],
+    [
+      "tb1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q0sl5k7",
+      "00201863143c14c5166804bd19203356da136c985678cd4d27a1b8c6329604903262"
+    ],
+    [
+      "bc1pw508d6qejxtdg4y5r3zarvary0c5xw7kw508d6qejxtdg4y5r3zarvary0c5xw7kt5nd6y",
+      "5128751e76e8199196d454941c45d1b3a323f1433bd6751e76e8199196d454941c45d1b3a323f1433bd6"
+    ],
     ["BC1SW50QGDZ25J", "6002751e"],
     ["bc1zw508d6qejxtdg4y5r3zarvaryvaxxpcs", "5210751e76e8199196d454941c45d1b3a323"],
-    ["tb1qqqqqp399et2xygdj5xreqhjjvcmzhxw4aywxecjdzew6hylgvsesrxh6hy",
-    "0020000000c4a5cad46221b2a187905e5266362b99d5e91c6ce24d165dab93e86433"],
-    ["tb1pqqqqp399et2xygdj5xreqhjjvcmzhxw4aywxecjdzew6hylgvsesf3hn0c",
-    "5120000000c4a5cad46221b2a187905e5266362b99d5e91c6ce24d165dab93e86433"],
-    ["bc1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7vqzk5jj0",
-    "512079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"]
+    [
+      "tb1qqqqqp399et2xygdj5xreqhjjvcmzhxw4aywxecjdzew6hylgvsesrxh6hy",
+      "0020000000c4a5cad46221b2a187905e5266362b99d5e91c6ce24d165dab93e86433"
+    ],
+    [
+      "tb1pqqqqp399et2xygdj5xreqhjjvcmzhxw4aywxecjdzew6hylgvsesf3hn0c",
+      "5120000000c4a5cad46221b2a187905e5266362b99d5e91c6ce24d165dab93e86433"
+    ],
+    [
+      "bc1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7vqzk5jj0",
+      "512079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+    ]
   ]
 
   # BIP0173 spec also includes
@@ -144,5 +157,13 @@ defmodule BIP0173Test do
     for addr <- @invalid_address do
       assert {:error, _} = SegwitAddr.decode(addr)
     end
+  end
+
+  test "super long address" do
+    address =
+      "ckb1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqv8sfawlgu3eslmnnf3cpmy5645kmmflkg55umxh"
+
+    {:ok, {prefix, payload, type}} = Bech32.decode(address, ignore_length: true)
+    assert address == Bech32.encode(prefix, payload, type)
   end
 end
