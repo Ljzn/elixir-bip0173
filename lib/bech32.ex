@@ -19,7 +19,7 @@
 # THE SOFTWARE.
 
 defmodule Bech32 do
-  use Bitwise
+  import Bitwise
 
   @moduledoc ~S"""
   Encode and decode the Bech32 and Bech32m format, with checksums.
@@ -201,5 +201,47 @@ defmodule Bech32 do
         )
       end)
     end)
+  end
+
+  # General power-of-2 base conversion.
+  def convert_bits(data, from, to, pad \\ true) do
+    max_v = (1 <<< to) - 1
+
+    if Enum.find(data, fn c -> c < 0 || c >>> from != 0 end) do
+      nil
+    else
+      {acc, bits, ret} =
+        Enum.reduce(
+          data,
+          {0, 0, []},
+          fn value, {acc, bits, ret} ->
+            acc = acc <<< from ||| value
+            bits = bits + from
+            {bits, ret} = convert_bits_loop(to, max_v, acc, bits, ret)
+            {acc, bits, ret}
+          end
+        )
+
+      if pad && bits > 0 do
+        ret ++ [acc <<< (to - bits) &&& max_v]
+      else
+        if bits > from || (acc <<< (to - bits) &&& max_v) > 0 do
+          nil
+        else
+          ret
+        end
+      end
+    end
+  end
+
+  # Recursive version of the inner loop of the convert_bits function
+  def convert_bits_loop(to, max_v, acc, bits, ret) do
+    if bits >= to do
+      bits = bits - to
+      ret = ret ++ [acc >>> bits &&& max_v]
+      convert_bits_loop(to, max_v, acc, bits, ret)
+    else
+      {bits, ret}
+    end
   end
 end
